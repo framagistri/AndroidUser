@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TicketTestAgain</string>
+    <string name="enter_username">username</string>
+    <string name="enter_password">password</string>
+    <string name="button_login">Login</string>
+    <string name="button_buy_tickets">Buy Tickets</string>
+    <string name="button_do_your_katsy">Do your own katsy</string>
+    <string name="text_ip">ip</string>
+    <string name="register_button">Register</string>
+    <string name="surname_text">surname</string>
+    <string name="email_text">email</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="nome">name</string>
+    <string name="vodice_fiscale_text">fiscal code</string>
+    <string name="my_tickets">show my Tickets</string>
+</resources>
