@@ -42,21 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
     RequestQueue requestQueue;
 
-    String url = "http://10.87.227.233:8080/ticket/webapi/secured/collector/login";
+    String url = "http://10.87.227.233:8080/ticket/webapi/secured/user/login";
 
     public static final String EXTRA_MESSAGE1 = "com.example.myfirstapp.MESSAGE";
 
     public static final String EXTRA_MESSAGE2 = "com.example.myfirstapp.MESSAGE";
 
-    private void interpretResponse(String response, String username,String password) {
+    private void interpretResponse(String response, String username) {
         if (response.equals("true")) {
-            goToLoginActivity(username,password);
+            goToLoginActivity(username);
         } else {
             wrongCredentials();
         }
     }
 
-    private void goToLoginActivity(String username,String password) {
+    private void goToLoginActivity(String username) {
         Context context = getApplicationContext();
         CharSequence text = "logged in!";
         int duration = Toast.LENGTH_SHORT;
@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         toast.show();
         intent.putExtra(EXTRA_MESSAGE1, username);
-        intent.putExtra(EXTRA_MESSAGE2, password);
         startActivity(intent);
     }
 
@@ -92,18 +91,18 @@ public class MainActivity extends AppCompatActivity {
         loginButton = (Button) findViewById(R.id.button);
         registerButton = (Button) findViewById(R.id.button2);
         requestQueue = Volley.newRequestQueue(MainActivity.this.getApplicationContext());
-        final StringBuilder stringBuilder = new StringBuilder();
         final EditText username = (EditText) findViewById(R.id.editText);
         final EditText password = (EditText) findViewById(R.id.editText3);
         loginButton.setOnClickListener(new Button.OnClickListener() {
                                            public void onClick(View v) {
+                                               final StringBuilder stringBuilder = new StringBuilder();
                                                JsonObjectRequest myJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
 
                                                        new Response.Listener<JSONObject>() {
                                                            @Override
                                                            public void onResponse(JSONObject response) {
                                                                try {
-                                                                   interpretResponse(response.getString("data"), username.getText().toString(),password.getText().toString());
+                                                                   interpretResponse(response.getString("data"), username.getText().toString());
                                                                } catch (JSONException e) {
                                                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                                                }

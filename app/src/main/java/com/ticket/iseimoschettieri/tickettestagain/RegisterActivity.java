@@ -15,9 +15,11 @@ import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,53 +37,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     Button registerButton = null;
 
+    RequestQueue requestQueue;
+
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
-    private static String url = null; /*DA DEFINIRE*/
-
-    private void sendRegistration(View view, String json_url, final String username, final String password, final String surname, final String fiscalCode) throws ExecutionException, InterruptedException {
-
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        /*DA MODIFICARE METODO DI AUTENTICAZIONE CON NUOVO PERCORSO*/
-
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, json_url, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            interpretResponse(response.getString("data"), username);
-                        } catch (JSONException e) {
-                            Toast.makeText(RegisterActivity.this, "oRc: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        NetworkResponse networkResponse = error.networkResponse;
-                    }
-
-                }
-                ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError { //DA MODIFICARE
-                HashMap<String, String> headers = new HashMap<String, String>();
-                stringBuilder.setLength(0);
-                stringBuilder.append(username.trim().toLowerCase());
-                stringBuilder.append(":");
-                stringBuilder.append(password.trim().toLowerCase());
-                String encodedCredentials = Base64.encodeToString(stringBuilder.toString().getBytes(), Base64.NO_WRAP);
-                headers.put("Authorization", "Basic " + encodedCredentials);
-
-                return headers;
-            }
-        };
-
-        //MySingleton.getinstance(MainActivity.this).addToRequestqueue(jsObjRequest);
-    }
-
-    private void interpretResponse(String response, String username) {
-        if (response.equals("true")) {
+    private void interpretResponse(String response) {
+        if (response.equals("USER CREATED")) {
             goToMainActivity();
         } else {
             wrongRegistration();
@@ -90,10 +51,10 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void goToMainActivity() {
         Context context = getApplicationContext();
-        CharSequence text = "Registration Successful!!";
+        CharSequence text = "User Created!";
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
-        Intent intent = new Intent(this, LoggedInActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
 
         toast.show();
         startActivity(intent);
@@ -101,7 +62,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void wrongRegistration() {
         Context context = getApplicationContext();
-        CharSequence text = "Wrong Registration!";
+        CharSequence text = "Creation Failed!";
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
@@ -112,19 +73,37 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         registerButton = (Button) findViewById(R.id.registerButton);
+        requestQueue = Volley.newRequestQueue(RegisterActivity.this.getApplicationContext());
+        final StringBuilder stringBuilder = new StringBuilder();
         final EditText username = (EditText) findViewById(R.id.usernameText);
         final EditText password = (EditText) findViewById(R.id.passwordText1);
         final EditText surname = (EditText) findViewById(R.id.surnameText);
         final EditText fiscalCode = (EditText) findViewById(R.id.codiceFiscaleText);
         registerButton.setOnClickListener(new Button.OnClickListener() {
                                               public void onClick(View v) {
-                                                  try {
-                                                      sendRegistration(v, url, username.getText().toString(), password.getText().toString(), surname.getText().toString(), fiscalCode.getText().toString());
-                                                  } catch (ExecutionException e) {
-                                                      e.printStackTrace();
-                                                  } catch (InterruptedException e) {
-                                                      e.printStackTrace();
-                                                  }
+                                                  final String url = "http://10.87.227.233:8080/ticket/webapi/registration/"+username.getText().toString()+"/"+surname.getText().toString()+"/"+username.getText().toString()+"/"+fiscalCode.getText().toString()+"/"+password.getText().toString();
+                                                  JsonObjectRequest myJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+
+                                                              new Response.Listener<JSONObject>() {
+                                                                  @Override
+                                                                  public void onResponse(JSONObject response) {
+                                                                      try {
+                                                                          interpretResponse(response.getString("data"));
+                                                                      } catch (JSONException e) {
+                                                                          Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                                                                      }
+                                                                  }
+                                                              },
+                                                              new Response.ErrorListener() {
+                                                                  @Override
+                                                                  public void onErrorResponse(VolleyError error) {
+                                                                      Toast.makeText(RegisterActivity.this,"Something went wrong " + error.getMessage(), Toast.LENGTH_LONG).show();
+                                                                      username.setText(error.getMessage());
+                                                                  }
+                                                              }
+                                                      );
+
+                                                      requestQueue.add(myJsonObjectRequest);
                                               }
                                           }
         );

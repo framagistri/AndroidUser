@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoggedInActivity extends AppCompatActivity {
 
@@ -18,7 +19,6 @@ public class LoggedInActivity extends AppCompatActivity {
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
         String usernameText = intent.getStringExtra(MainActivity.EXTRA_MESSAGE1);
-        String passwordText = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
 
         // Capture the layout's TextView and set the string as its text
         TextView loggedInAs = (TextView) findViewById(R.id.textView);
