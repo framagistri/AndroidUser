@@ -5,13 +5,22 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.android.volley.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,65 +30,56 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
-    Button myButton = null;
+    Button loginButton = null;
 
-    Button myButton2 = null;
+    Button registerButton = null;
 
-    public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
+    RequestQueue requestQueue;
 
-    public void sendMessage(View view) throws ExecutionException, InterruptedException {
+    String url = "http://10.87.227.233:8080/ticket/webapi/secured/collector/login";
 
-        Context context = getApplicationContext();
-        CharSequence text = "logged in!";
-        int duration = Toast.LENGTH_SHORT;
+    public static final String EXTRA_MESSAGE1 = "com.example.myfirstapp.MESSAGE";
 
-        Toast toast = Toast.makeText(context, text, duration);
+    public static final String EXTRA_MESSAGE2 = "com.example.myfirstapp.MESSAGE";
 
-        String login = null;
-
-        Socket clientSocket;
-
-        Intent intent = new Intent(this, LoggedInActivity.class);
-        EditText editText = (EditText) findViewById(R.id.editText);
-        EditText editText2 = (EditText) findViewById(R.id.editText2);
-        EditText editText3 = (EditText) findViewById(R.id.editText3);
-        String message = editText.getText().toString();
-
-        login = new JsonLogin().execute(editText.getText().toString(),editText3.getText().toString(),editText2.getText().toString()).get();
-
-        if(login.equals("true")) {
-
-            toast.show();
-
-            intent.putExtra(EXTRA_MESSAGE, message);
-            startActivity(intent);
-
-        }
-
-        else{
-
-            CharSequence textErr = "Wrong Credentials!";
-            toast = Toast.makeText(context, textErr, duration);
-            toast.show();
-
+    private void interpretResponse(String response, String username,String password) {
+        if (response.equals("true")) {
+            goToLoginActivity(username,password);
+        } else {
+            wrongCredentials();
         }
     }
 
-    public void goToRegisterActivity(View view){
+    private void goToLoginActivity(String username,String password) {
+        Context context = getApplicationContext();
+        CharSequence text = "logged in!";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        Intent intent = new Intent(this, LoggedInActivity.class);
+
+        toast.show();
+        intent.putExtra(EXTRA_MESSAGE1, username);
+        intent.putExtra(EXTRA_MESSAGE2, password);
+        startActivity(intent);
+    }
+
+    private void wrongCredentials() {
+        Context context = getApplicationContext();
+        CharSequence text = "Wrong Credentials!";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
+
+    public void goToRegisterActivity(View view) {
 
         Intent intent = new Intent(this, RegisterActivity.class);
-        EditText editText2 = (EditText) findViewById(R.id.editText2);
-        String message = editText2.getText().toString();
-        if(message.equals("")){
-
-            message = "10.87.130.83";
-
-        }
-        intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
 
     }
@@ -89,138 +89,58 @@ public class MainActivity extends AppCompatActivity{
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        myButton = (Button) findViewById(R.id.button);
-        myButton2 = (Button) findViewById(R.id.button2);
-        myButton.setOnClickListener(new Button.OnClickListener() {
-                                        public void onClick(View v) {
-                                            try {
-                                                sendMessage(v);
-                                            } catch (ExecutionException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }
+        loginButton = (Button) findViewById(R.id.button);
+        registerButton = (Button) findViewById(R.id.button2);
+        requestQueue = Volley.newRequestQueue(MainActivity.this.getApplicationContext());
+        final StringBuilder stringBuilder = new StringBuilder();
+        final EditText username = (EditText) findViewById(R.id.editText);
+        final EditText password = (EditText) findViewById(R.id.editText3);
+        loginButton.setOnClickListener(new Button.OnClickListener() {
+                                           public void onClick(View v) {
+                                               JsonObjectRequest myJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+
+                                                       new Response.Listener<JSONObject>() {
+                                                           @Override
+                                                           public void onResponse(JSONObject response) {
+                                                               try {
+                                                                   interpretResponse(response.getString("data"), username.getText().toString(),password.getText().toString());
+                                                               } catch (JSONException e) {
+                                                                   Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                                                               }
+                                                           }
+                                                       },
+                                                       new Response.ErrorListener() {
+                                                           @Override
+                                                           public void onErrorResponse(VolleyError error) {
+                                                               Toast.makeText(MainActivity.this,"Something went wrong " + error.getMessage(), Toast.LENGTH_LONG).show();
+                                                               username.setText(error.getMessage());
+                                                           }
+                                                       }
+                                               ) {@Override
+                                               public Map< String, String > getHeaders() throws AuthFailureError {
+                                                   HashMap< String, String > headers = new HashMap < String, String > ();
+                                                   stringBuilder.append(username.getText().toString().trim());
+                                                   stringBuilder.append(":");
+                                                   stringBuilder.append(password.getText().toString().trim());
+                                                   String encodedCredentials = Base64.encodeToString(stringBuilder.toString().getBytes(), Base64.NO_WRAP);
+                                                   headers.put("Authorization", "Basic " + encodedCredentials);
+
+                                                   return headers;
+                                               }
+                                               };
+
+                                               requestQueue.add(myJsonObjectRequest);
+                                           }
+                                       }
         );
 
-        myButton2.setOnClickListener(new Button.OnClickListener() {
-                                        public void onClick(View v) {
-                                            goToRegisterActivity(v);
-                                        }
-                                    }
+        registerButton.setOnClickListener(new Button.OnClickListener() {
+                                              public void onClick(View v) {
+                                                  goToRegisterActivity(v);
+                                              }
+                                          }
         );
-
-
     }
-
-
-    private class JsonLogin extends AsyncTask<String, Void, String> {
-
-        private final String JsonMethod = "USERLOGIN";
-
-        private String answerString = null;
-
-        private String loginString = null;
-
-        private String ip = null;
-
-        JSONObject login = null;
-
-        JSONObject data = null;
-
-        JSONObject answer = null;
-
-        String loginSuccess = null;
-
-        Socket clientSocket = null;
-
-        Socket serverSocket = null;
-
-        Socket socket = null;
-
-        PrintWriter out;
-
-        BufferedReader in;
-
-        @Override
-        protected String doInBackground(String... args) {
-
-            try {
-
-                ip = args[2].toString();
-
-                if(ip.equals("")){
-
-                    ip = "10.87.130.83";
-
-                }
-
-                clientSocket = new Socket(ip, 5000);
-
-                //clientSocket.isConnected();
-
-                login = new JSONObject();
-
-                login.put("method", JsonMethod);
-
-                data = new JSONObject();
-
-                data.put("username", args[0].toString());
-
-                data.put("psw", args[1].toString());
-
-                login.put("data", data);
-
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-                out.println(login.toString());
-
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-                //out.println(login.toString());
-
-                answerString = in.readLine();
-
-                answer = new JSONObject(answerString);
-
-                Log.d("gigiTag",answer.toString());
-
-                //clientSocket.close();
-
-                if(answer.getString("data").equals("true")){
-
-                    loginString = "true";
-
-                }
-
-                else{
-
-                    loginString = "false";
-
-                }
-
-                return loginString;
-
-            }
-
-            catch(IOException i){
-
-                Log.d("JsonTag",i.toString());
-
-                System.err.println(i);
-
-            }
-
-            catch(JSONException j){
-
-                System.err.println(j);
-
-            }
-
-            return null;
-        }
-
-    }
-
 }
+
+

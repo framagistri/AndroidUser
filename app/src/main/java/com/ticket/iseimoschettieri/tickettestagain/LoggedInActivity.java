@@ -17,11 +17,14 @@ public class LoggedInActivity extends AppCompatActivity {
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        String usernameText = intent.getStringExtra(MainActivity.EXTRA_MESSAGE1);
+        String passwordText = intent.getStringExtra(MainActivity.EXTRA_MESSAGE2);
 
         // Capture the layout's TextView and set the string as its text
-        TextView text = (TextView) findViewById(R.id.textView);
-        text.setText("Logged in as: "+message);
+        TextView loggedInAs = (TextView) findViewById(R.id.textView);
+        TextView username = (TextView) findViewById(R.id.username);
+        loggedInAs.setText("Logged in as:");
+        username.setText(usernameText);
 
     }
 

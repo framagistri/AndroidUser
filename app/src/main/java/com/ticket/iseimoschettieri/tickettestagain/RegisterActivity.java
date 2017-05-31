@@ -5,11 +5,19 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -27,153 +37,97 @@ public class RegisterActivity extends AppCompatActivity {
 
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
-    public void sendRegistration(View view,String ip) throws ExecutionException, InterruptedException {
+    private static String url = null; /*DA DEFINIRE*/
 
+    private void sendRegistration(View view, String json_url, final String username, final String password, final String surname, final String fiscalCode) throws ExecutionException, InterruptedException {
+
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        /*DA MODIFICARE METODO DI AUTENTICAZIONE CON NUOVO PERCORSO*/
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, json_url, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            interpretResponse(response.getString("data"), username);
+                        } catch (JSONException e) {
+                            Toast.makeText(RegisterActivity.this, "oRc: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse networkResponse = error.networkResponse;
+                    }
+
+                }
+                ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError { //DA MODIFICARE
+                HashMap<String, String> headers = new HashMap<String, String>();
+                stringBuilder.setLength(0);
+                stringBuilder.append(username.trim().toLowerCase());
+                stringBuilder.append(":");
+                stringBuilder.append(password.trim().toLowerCase());
+                String encodedCredentials = Base64.encodeToString(stringBuilder.toString().getBytes(), Base64.NO_WRAP);
+                headers.put("Authorization", "Basic " + encodedCredentials);
+
+                return headers;
+            }
+        };
+
+        //MySingleton.getinstance(MainActivity.this).addToRequestqueue(jsObjRequest);
+    }
+
+    private void interpretResponse(String response, String username) {
+        if (response.equals("true")) {
+            goToMainActivity();
+        } else {
+            wrongRegistration();
+        }
+    }
+
+    private void goToMainActivity() {
         Context context = getApplicationContext();
-        CharSequence text = "Registration successful!";
+        CharSequence text = "Registration Successful!!";
         int duration = Toast.LENGTH_SHORT;
-
         Toast toast = Toast.makeText(context, text, duration);
+        Intent intent = new Intent(this, LoggedInActivity.class);
 
-        String register = null;
+        toast.show();
+        startActivity(intent);
+    }
 
-        Socket clientSocket;
-
-        Intent intent = new Intent(this, MainActivity.class);
-        EditText username = (EditText) findViewById(R.id.usernameText);
-        EditText password = (EditText) findViewById(R.id.passwordText1);
-        EditText surname = (EditText) findViewById(R.id.surnameText);
-        EditText fiscalCode = (EditText) findViewById(R.id.codiceFiscaleText);
-
-        register = new JsonRegister().execute(username.getText().toString(),password.getText().toString(),surname.getText().toString(),fiscalCode.getText().toString(),ip).get();
-
-        if(register.equals("true")) {
-
-            toast.show();
-            startActivity(intent);
-
-        }
-
-        else{
-
-            CharSequence textErr = "Registration failed!";
-            toast = Toast.makeText(context, textErr, duration);
-            toast.show();
-
-        }
+    private void wrongRegistration() {
+        Context context = getApplicationContext();
+        CharSequence text = "Wrong Registration!";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Intent intent = getIntent();
-        final String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
         registerButton = (Button) findViewById(R.id.registerButton);
+        final EditText username = (EditText) findViewById(R.id.usernameText);
+        final EditText password = (EditText) findViewById(R.id.passwordText1);
+        final EditText surname = (EditText) findViewById(R.id.surnameText);
+        final EditText fiscalCode = (EditText) findViewById(R.id.codiceFiscaleText);
         registerButton.setOnClickListener(new Button.OnClickListener() {
-                                        public void onClick(View v) {
-                                            try {
-                                                sendRegistration(v,message);
-                                            } catch (ExecutionException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }
+                                              public void onClick(View v) {
+                                                  try {
+                                                      sendRegistration(v, url, username.getText().toString(), password.getText().toString(), surname.getText().toString(), fiscalCode.getText().toString());
+                                                  } catch (ExecutionException e) {
+                                                      e.printStackTrace();
+                                                  } catch (InterruptedException e) {
+                                                      e.printStackTrace();
+                                                  }
+                                              }
+                                          }
         );
-    }
-
-    private class JsonRegister extends AsyncTask<String, Void, String> {
-
-        private final String JsonMethod = "CREATEUSER";
-
-        private String answerString = null;
-
-        private String loginString = null;
-
-        JSONObject login = null;
-
-        JSONObject data = null;
-
-        JSONObject answer = null;
-
-        Socket clientSocket = null;
-
-        PrintWriter out;
-
-        BufferedReader in;
-
-        @Override
-        protected String doInBackground(String... args) {
-
-            try {
-
-                clientSocket = new Socket(args[4].toString(), 5000);
-
-                login = new JSONObject();
-
-                login.put("method", JsonMethod);
-
-                data = new JSONObject();
-
-                data.put("name", args[0].toString());
-
-                data.put("surname", args[2].toString());
-
-                data.put("username", args[0].toString());
-
-                data.put("cf",args[3].toString());
-
-                data.put("psw", args[1].toString());
-
-                login.put("data", data);
-
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-                out.println(login.toString());
-
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-                answerString = in.readLine();
-
-                answer = new JSONObject(answerString);
-
-                Log.d("gigiTag",answer.toString());
-
-                if(answer.getString("data").equals("true")){
-
-                    loginString = "true";
-
-                }
-
-                else{
-
-                    loginString = "false";
-
-                }
-
-                return loginString;
-
-            }
-
-            catch(IOException i){
-
-                Log.d("JsonTag",i.toString());
-
-                System.err.println(i);
-
-            }
-
-            catch(JSONException j){
-
-                System.err.println(j);
-
-            }
-
-            return null;
-        }
-
     }
 
 }
