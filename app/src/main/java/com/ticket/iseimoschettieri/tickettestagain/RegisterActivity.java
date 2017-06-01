@@ -68,6 +68,20 @@ public class RegisterActivity extends AppCompatActivity {
         toast.show();
     }
 
+    private boolean isEverythingCompiled(String name,String password,String surname,String fiscalCode,String username){
+        if(name.equals("")|| password.equals("") || surname.equals("")|| fiscalCode.equals("")||username.equals("")){
+            return false;
+        }
+        return true;
+    }
+
+    private boolean doesPasswordMatch(String password1,String password2){
+        if(password1.equals(password2)){
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,35 +89,46 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = (Button) findViewById(R.id.registerButton);
         requestQueue = Volley.newRequestQueue(RegisterActivity.this.getApplicationContext());
         final StringBuilder stringBuilder = new StringBuilder();
-        final EditText username = (EditText) findViewById(R.id.usernameText);
+        final EditText username = (EditText) findViewById(R.id.usernameVero);
+        final EditText name = (EditText) findViewById(R.id.usernameText);
         final EditText password = (EditText) findViewById(R.id.passwordText1);
+        final EditText password2 = (EditText) findViewById(R.id.passwordText2);
         final EditText surname = (EditText) findViewById(R.id.surnameText);
         final EditText fiscalCode = (EditText) findViewById(R.id.codiceFiscaleText);
         registerButton.setOnClickListener(new Button.OnClickListener() {
                                               public void onClick(View v) {
-                                                  final String url = "http://10.87.227.233:8080/ticket/webapi/registration/"+username.getText().toString()+"/"+surname.getText().toString()+"/"+username.getText().toString()+"/"+fiscalCode.getText().toString()+"/"+password.getText().toString();
-                                                  JsonObjectRequest myJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                                                  final String url = "http://10.87.251.254:7070/ticket/webapi/registration/" + name.getText().toString() + "/" + surname.getText().toString() + "/" + username.getText().toString() + "/" + fiscalCode.getText().toString() + "/" + password.getText().toString();
+                                                  if (isEverythingCompiled(name.getText().toString(), password.getText().toString(), surname.getText().toString(),fiscalCode.getText().toString(),username.getText().toString())) {
+                                                      if (doesPasswordMatch(password.getText().toString(), password2.getText().toString())) {
+                                                          JsonObjectRequest myJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
 
-                                                              new Response.Listener<JSONObject>() {
-                                                                  @Override
-                                                                  public void onResponse(JSONObject response) {
-                                                                      try {
-                                                                          interpretResponse(response.getString("data"));
-                                                                      } catch (JSONException e) {
-                                                                          Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                                                                  new Response.Listener<JSONObject>() {
+                                                                      @Override
+                                                                      public void onResponse(JSONObject response) {
+                                                                          try {
+                                                                              interpretResponse(response.getString("data"));
+                                                                          } catch (JSONException e) {
+                                                                              Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                                                                          }
+                                                                      }
+                                                                  },
+                                                                  new Response.ErrorListener() {
+                                                                      @Override
+                                                                      public void onErrorResponse(VolleyError error) {
+                                                                          Toast.makeText(RegisterActivity.this, "Something went wrong " + error.getMessage(), Toast.LENGTH_LONG).show();
                                                                       }
                                                                   }
-                                                              },
-                                                              new Response.ErrorListener() {
-                                                                  @Override
-                                                                  public void onErrorResponse(VolleyError error) {
-                                                                      Toast.makeText(RegisterActivity.this,"Something went wrong " + error.getMessage(), Toast.LENGTH_LONG).show();
-                                                                      username.setText(error.getMessage());
-                                                                  }
-                                                              }
-                                                      );
+                                                          );
 
-                                                      requestQueue.add(myJsonObjectRequest);
+                                                          requestQueue.add(myJsonObjectRequest);
+                                                      }
+                                                      else{
+                                                          Toast.makeText(RegisterActivity.this,"Password 1 and 2 do not match!", Toast.LENGTH_LONG).show();
+                                                      }
+                                                  }
+                                                  else{
+                                                      Toast.makeText(RegisterActivity.this,"Compile all Fields!", Toast.LENGTH_LONG).show();
+                                                  }
                                               }
                                           }
         );

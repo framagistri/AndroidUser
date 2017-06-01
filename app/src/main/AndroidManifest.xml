@@ -25,7 +25,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".TicketSelection" />
+        <activity android:name=".PayWithCreditCardActivity"></activity>
     </application>
 
 </manifest>

@@ -45,19 +45,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/usernameText" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="0dp"
-        android:layout_height="22dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:hint="@string/date_of_birth"
-        android:textColor="@android:color/holo_orange_light"
-        android:textColorHighlight="@android:color/holo_orange_light"
-        android:textColorHint="@android:color/holo_orange_light"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/surnameText" />
-
     <EditText
         android:id="@+id/emailText"
         android:layout_width="0dp"
@@ -131,21 +118,23 @@
         app:layout_constraintTop_toBottomOf="@+id/passwordText2" />
 
     <EditText
-        android:id="@+id/dateOfBirthText"
+        android:id="@+id/usernameVero"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
-        android:inputType="date"
+        android:hint="@string/enter_username"
+        android:inputType="text"
         android:textColor="@android:color/holo_orange_light"
         android:textColorHighlight="@android:color/holo_blue_dark"
         android:textColorHint="@android:color/holo_orange_light"
         android:textColorLink="@android:color/holo_blue_dark"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView2"
-        app:layout_constraintLeft_toRightOf="@+id/textView2"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/surnameText" />
 
     <EditText
         android:id="@+id/codiceFiscaleText"
@@ -164,6 +153,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dateOfBirthText" />
+        app:layout_constraintTop_toBottomOf="@+id/usernameVero" />
 
 </android.support.constraint.ConstraintLayout>

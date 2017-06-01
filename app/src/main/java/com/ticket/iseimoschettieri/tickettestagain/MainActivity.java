@@ -42,27 +42,25 @@ public class MainActivity extends AppCompatActivity {
 
     RequestQueue requestQueue;
 
-    String url = "http://10.87.227.233:8080/ticket/webapi/secured/user/login";
+    String url = "http://10.87.251.254:7070/ticket/webapi/secured/user/login";
 
     public static final String EXTRA_MESSAGE1 = "com.example.myfirstapp.MESSAGE";
 
-    public static final String EXTRA_MESSAGE2 = "com.example.myfirstapp.MESSAGE";
-
-    private void interpretResponse(String response, String username) {
+    private void interpretResponse(String response, String username,String password) {
         if (response.equals("true")) {
-            goToLoginActivity(username);
+            goToLoginActivity(username,password);
         } else {
             wrongCredentials();
         }
     }
 
-    private void goToLoginActivity(String username) {
+    private void goToLoginActivity(String username,String password) {
         Context context = getApplicationContext();
         CharSequence text = "logged in!";
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         Intent intent = new Intent(this, LoggedInActivity.class);
-
+        UserInfoHandler.saveInfo(this,username,password);
         toast.show();
         intent.putExtra(EXTRA_MESSAGE1, username);
         startActivity(intent);
@@ -102,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                                                            @Override
                                                            public void onResponse(JSONObject response) {
                                                                try {
-                                                                   interpretResponse(response.getString("data"), username.getText().toString());
+                                                                   interpretResponse(response.getString("data"), username.getText().toString(),password.getText().toString());
                                                                } catch (JSONException e) {
                                                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                                                }
@@ -123,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
                                                    stringBuilder.append(password.getText().toString().trim());
                                                    String encodedCredentials = Base64.encodeToString(stringBuilder.toString().getBytes(), Base64.NO_WRAP);
                                                    headers.put("Authorization", "Basic " + encodedCredentials);
-
                                                    return headers;
                                                }
                                                };
