@@ -31,7 +31,6 @@ import java.util.Map;
 
 public class TicketSelection extends AppCompatActivity {
 
-    //private ArrayList<TicketType> tickets = new ArrayList<TicketType>();
     Spinner types;
     RequestQueue requestQueue;
     private Map<String, Products> productMap;
@@ -61,10 +60,10 @@ public class TicketSelection extends AppCompatActivity {
                 String selectedType = types.getSelectedItem().toString();
                 Products selectedProduct = null;
                 for (Products p : productMap.values()) {
-                    if (selectedType.contains(p.getName() + " ")) {
+                    if (selectedType.contains(p.getDescription() + " ")) {
                         selectedProduct = p;
 
-                        goToPayActivity(p.getId(),p.getDuration());
+                        goToPayActivity(p.getType(),p.getDuration());
                     }
                 }
 
@@ -110,15 +109,20 @@ public class TicketSelection extends AppCompatActivity {
 
     private void parseTickets(JSONObject obj){
         try {
-            JSONArray ticketArray = (JSONArray)obj.get("data");
+            JSONArray ticketArray = (JSONArray)obj.get("DATA");
             for(int i = 0; i < ticketArray.length();i++){
                 JSONObject ticket = (JSONObject) ticketArray.get(i);
 
-                double duration = (Double)ticket.get("duration");
-                String id = (String)ticket.get("id");
-                double cost = (Double)ticket.get("cost");
-                String name = (String)ticket.get("name");
-                productMap.put(id , new SimpleTicket(name,id,cost,duration));
+                int duration = (int)ticket.get("DURATION");
+                String type = (String)ticket.get("TYPE");
+                double cost = (Double)ticket.get("COST");
+                String description = (String)ticket.get("DESCRIPTION");
+                if(type.charAt(0) == 'T') {
+                    productMap.put(type, new SimpleTicket(description, type, cost, duration));
+                }
+                else{
+                    productMap.put(type, new SeasonTicket(description, type, cost, duration,new SimpleAlgorithm()));
+                }
             }
 
         } catch (JSONException e) {
@@ -131,7 +135,7 @@ public class TicketSelection extends AppCompatActivity {
         types.setAdapter(adapter);
         List<CharSequence> list = new ArrayList<CharSequence>();
         for (Products p : productMap.values()) {
-            list.add(p.getName() + " - " + p.getCost() + "€ - " + (int)(p.getDuration()) + " m");
+            list.add(p.getDescription() + " - " + p.getCost() + "€ - " + (int)(p.getDuration()) + " m");
         }
         adapter.addAll(list);
         adapter.notifyDataSetChanged();

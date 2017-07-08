@@ -106,7 +106,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                                       @Override
                                                                       public void onResponse(JSONObject response) {
                                                                           try {
-                                                                              interpretResponse(response.getString("data"));
+                                                                              interpretResponse(response.getString("DATA"));
                                                                           } catch (JSONException e) {
                                                                               Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                                                           }

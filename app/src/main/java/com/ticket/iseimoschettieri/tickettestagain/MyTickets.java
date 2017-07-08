@@ -59,7 +59,7 @@ public class MyTickets extends AppCompatActivity {
         String vettore = intent.getStringExtra("Vector");
         try {
             dataArray = new JSONObject(vettore);
-            arrayVero = new JSONArray(dataArray.getString("data"));
+            arrayVero = new JSONArray(dataArray.getString("DATA"));
             createTicketButton();
         } catch (JSONException e) {
             e.printStackTrace();

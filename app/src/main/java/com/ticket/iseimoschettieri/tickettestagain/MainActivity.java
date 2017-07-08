@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE1 = "com.example.myfirstapp.MESSAGE";
 
     private void interpretResponse(String response, String username,String password) {
-        if (response.equals("true")) {
+        if (response.equals("TRUE")) {
             goToLoginActivity(username,password);
         } else {
             wrongCredentials();

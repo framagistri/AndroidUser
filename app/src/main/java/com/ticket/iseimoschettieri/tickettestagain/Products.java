@@ -6,7 +6,7 @@ package com.ticket.iseimoschettieri.tickettestagain;
 
 public interface Products {
     double getCost();
-    String getName();
-    String getId();
-    double getDuration();
+    String getDescription();
+    String getType();
+    int getDuration();
 }

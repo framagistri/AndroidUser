@@ -39,9 +39,9 @@ public class PayWithCreditCardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pay_with_credit_card);
         Intent intent = getIntent();
         final String type = intent.getStringExtra("ticketType");
-        final double duration = intent.getDoubleExtra("ticketDuration",0);
+        final int duration = intent.getIntExtra("ticketDuration",0);
         final Date paymentDate = new Date();
-        paymentDate.setHours(paymentDate.getHours()+(int)duration);
+        paymentDate.setHours(paymentDate.getHours()+duration);
         requestQueue = Volley.newRequestQueue(PayWithCreditCardActivity.this.getApplicationContext());
         Button buyButton = (Button)findViewById(R.id.buy);
         final EditText field1 = (EditText) findViewById(R.id.text1);
