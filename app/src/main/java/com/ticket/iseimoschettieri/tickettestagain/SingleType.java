@@ -18,12 +18,13 @@ public class SingleType implements TicketType {
         return cost;
     }
 
+    @Override
     public int getDuration() {
         return duration;
     }
 
     @Override
     public String getType() {
-        return "Single";
+        return "A";
     }
 }

@@ -60,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         Intent intent = new Intent(this, LoggedInActivity.class);
-        UserInfoHandler.saveInfo(this,username,password);
+        UserInfoHandler.setUsername(this,username);
+        UserInfoHandler.setPassword(this,password);
         toast.show();
         intent.putExtra(EXTRA_MESSAGE1, username);
         startActivity(intent);
@@ -80,6 +81,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
+    /*private void goToShowTickets(String data){
+        Intent intent2 = new Intent(this, MyTickets.class);
+        intent2.putExtra("Vector",data);
+        startActivity(intent2);
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +142,12 @@ public class MainActivity extends AppCompatActivity {
                                               }
                                           }
         );
+
+        /*test.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                goToShowTickets("{\"data\":[{ \"id\": \"String\",\"expire\": \"String\",\"type\": \"String\"}]}");
+            }
+        });*/
     }
 }
 

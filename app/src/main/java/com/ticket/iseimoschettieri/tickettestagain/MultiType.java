@@ -28,6 +28,9 @@ public class MultiType implements TicketType {
 
     @Override
     public String getType() {
-        return "Multi";
+        return "B";
     }
+
+    @Override
+    public int getDuration(){ return 0; }
 }

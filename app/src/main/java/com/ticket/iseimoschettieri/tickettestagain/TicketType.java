@@ -7,5 +7,6 @@ package com.ticket.iseimoschettieri.tickettestagain;
 public interface TicketType {
     public double getCost();
     public String getType();
+    public int getDuration();
 }
 

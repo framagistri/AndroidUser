@@ -27,7 +27,8 @@
         </activity>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".TicketSelection" />
-        <activity android:name=".PayWithCreditCardActivity"></activity>
+        <activity android:name=".PayWithCreditCardActivity" />
+        <activity android:name=".MyTickets"></activity>
     </application>
 
 </manifest>

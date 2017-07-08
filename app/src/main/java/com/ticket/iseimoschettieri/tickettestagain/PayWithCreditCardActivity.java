@@ -28,15 +28,22 @@ public class PayWithCreditCardActivity extends AppCompatActivity {
 
     private RequestQueue requestQueue;
 
+    private void goToLoggedInActivity(){
+        Intent intent1 = new Intent(this,LoggedInActivity.class);
+        startActivity(intent1);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pay_with_credit_card);
-        final Date paymentDate = new Date();
-        requestQueue = Volley.newRequestQueue(PayWithCreditCardActivity.this.getApplicationContext());
-        Button buyButton = (Button)findViewById(R.id.buy);
         Intent intent = getIntent();
         final String type = intent.getStringExtra("ticketType");
+        final double duration = intent.getDoubleExtra("ticketDuration",0);
+        final Date paymentDate = new Date();
+        paymentDate.setHours(paymentDate.getHours()+(int)duration);
+        requestQueue = Volley.newRequestQueue(PayWithCreditCardActivity.this.getApplicationContext());
+        Button buyButton = (Button)findViewById(R.id.buy);
         final EditText field1 = (EditText) findViewById(R.id.text1);
         final EditText field2 = (EditText) findViewById(R.id.text2);
         final EditText field3 = (EditText) findViewById(R.id.text3);
@@ -51,7 +58,8 @@ public class PayWithCreditCardActivity extends AppCompatActivity {
                                     @Override
                                     public void onResponse(JSONObject response) {
                                         try {
-                                            Toast.makeText(PayWithCreditCardActivity.this, response.getString("data"), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(PayWithCreditCardActivity.this, response.getString("Payement Successful!"), Toast.LENGTH_LONG).show();
+                                            goToLoggedInActivity();
                                         } catch (JSONException e) {
                                             Toast.makeText(PayWithCreditCardActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                         }
